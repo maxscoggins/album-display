@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Now Playing — CRT Display</title>
+<title>Now Playing — Album Display</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=JetBrains+Mono:wght@400;500;700&family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#050505;
@@ -25,84 +25,71 @@
     color:var(--text);
   }
 
-  /* ---------- Ambient blurred backdrop ---------- */
+  /* ---------- Blurred full-bleed backdrop — same image, always fills screen ---------- */
   #backdrop{
     position:fixed; inset:0;
     background-size:cover;
     background-position:center;
-    filter:blur(60px) saturate(1.3) brightness(0.35);
-    transform:scale(1.2);
-    transition:background-image 0.6s ease;
+    filter:blur(70px) saturate(1.3) brightness(0.4);
+    transform:scale(1.15);
+    transition:background-image 0.5s ease;
     z-index:0;
   }
   #backdrop::after{
     content:"";
     position:absolute; inset:0;
-    background:radial-gradient(ellipse at center, transparent 30%, #000 95%);
+    background:radial-gradient(ellipse at center, transparent 40%, #000 95%);
   }
 
-  /* ---------- Stage ---------- */
-  #stage{
-    position:relative;
+  /* ---------- Sharp art, sized to the smaller viewport dimension so it
+       stays square and dominant. Its own edges fade to transparent via
+       mask, revealing the blurred backdrop seamlessly underneath —
+       this removes the "framed square in black bars" look on wide
+       screens. On a square-ish monitor the fade barely shows, since
+       the art already fills nearly the whole screen. ---------- */
+  #art-sharp{
+    position:fixed;
+    top:50%; left:50%;
+    width:min(94vh, 94vw);
+    height:min(94vh, 94vw);
+    transform:translate(-50%, -50%);
     z-index:1;
-    width:100%; height:100%;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    padding:5vh 0 0 0;
-  }
-
-  #art-frame{
-    position:relative;
-    width:min(64vh, 64vw);
-    height:min(64vh, 64vw);
-    border:2px solid var(--hairline);
-    box-shadow:
-      0 0 0 8px #000,
-      0 0 60px rgba(0,0,0,0.7),
-      0 30px 80px rgba(0,0,0,0.6);
-    background:var(--panel);
     overflow:hidden;
+    -webkit-mask-image:radial-gradient(circle at center, black 58%, transparent 90%);
+    mask-image:radial-gradient(circle at center, black 58%, transparent 90%);
   }
-  #art-frame img{
+  #art-sharp img{
     width:100%; height:100%;
     object-fit:cover;
     display:block;
   }
-  /* faint scanline texture over the art, like phosphor rows */
-  #art-frame::before{
+  /* faint scanline texture, CRT theme only (see theme block below) */
+  #art-sharp::before{
     content:"";
     position:absolute; inset:0;
-    background:repeating-linear-gradient(
-      to bottom,
-      rgba(0,0,0,0.12) 0px,
-      rgba(0,0,0,0.12) 1px,
-      transparent 2px,
-      transparent 3px
-    );
     pointer-events:none;
-    mix-blend-mode:multiply;
   }
-  /* corner brackets, like a viewfinder / bezel guide */
-  .bracket{
-    position:absolute; width:22px; height:22px;
-    border-color:var(--amber);
-    opacity:0.85;
-  }
-  .bracket.tl{top:-2px; left:-2px; border-top:2px solid; border-left:2px solid;}
-  .bracket.tr{top:-2px; right:-2px; border-top:2px solid; border-right:2px solid;}
-  .bracket.bl{bottom:-2px; left:-2px; border-bottom:2px solid; border-left:2px solid;}
-  .bracket.br{bottom:-2px; right:-2px; border-bottom:2px solid; border-right:2px solid;}
 
-  /* ---------- Info / LCD status panel ---------- */
-  #panel{
-    width:min(64vh, 64vw);
-    margin-top:3.2vh;
-    display:flex;
-    flex-direction:column;
-    gap:1.1vh;
+  /* ---------- Info overlay — layered directly on the art, not stacked
+       below it. Its own scrim fades upward so it reads over any
+       artwork without needing a solid background. ---------- */
+  #info-overlay{
+    position:fixed;
+    left:50%; bottom:5vh;
+    transform:translateX(-50%);
+    width:min(78vh, 78vw);
+    z-index:3;
+    padding:10vh 6px 6px;
   }
+  #info-overlay::before{
+    content:"";
+    position:absolute;
+    left:-12%; right:-12%; top:0; bottom:-4vh;
+    background:linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.5) 45%, transparent 100%);
+    z-index:-1;
+    pointer-events:none;
+  }
+
   #title-row{
     display:flex;
     justify-content:space-between;
@@ -112,7 +99,7 @@
   #track-title{
     font-family:'Big Shoulders Display', sans-serif;
     font-weight:800;
-    font-size:clamp(22px, 3.4vh, 40px);
+    font-size:clamp(20px, 3.4vh, 38px);
     text-transform:uppercase;
     letter-spacing:0.02em;
     line-height:1;
@@ -121,7 +108,7 @@
     text-overflow:ellipsis;
   }
   #year{
-    font-size:14px;
+    font-size:13px;
     color:var(--amber);
     border:1px solid var(--amber-dim);
     padding:3px 8px;
@@ -129,7 +116,8 @@
     flex-shrink:0;
   }
   #artist-row{
-    font-size:clamp(12px, 1.6vh, 16px);
+    margin-top:0.6vh;
+    font-size:clamp(11px, 1.6vh, 16px);
     color:var(--text-dim);
     letter-spacing:0.05em;
     text-transform:uppercase;
@@ -138,12 +126,11 @@
     text-overflow:ellipsis;
   }
 
-  /* segmented LED progress bar, signature element */
   #led-row{
     display:flex;
     align-items:center;
     gap:10px;
-    margin-top:0.4vh;
+    margin-top:1.6vh;
   }
   #elapsed, #duration{
     font-size:11px;
@@ -160,7 +147,7 @@
   }
   .led{
     flex:1;
-    background:var(--hairline);
+    background:rgba(255,255,255,0.15);
     border-radius:1px;
   }
   .led.lit{
@@ -172,7 +159,7 @@
     display:flex;
     justify-content:space-between;
     align-items:center;
-    margin-top:0.8vh;
+    margin-top:1vh;
     font-size:10px;
     letter-spacing:0.15em;
     color:var(--text-dim);
@@ -180,10 +167,89 @@
   }
   #play-state span{ color:var(--amber); }
 
-  /* ---------- Idle / setup wizard screens ---------- */
+  /* ---------- Theme picker — collapsed to a small icon, pops open ---------- */
+  #theme-toggle{
+    position:fixed;
+    top:18px; right:18px;
+    z-index:6;
+    width:32px; height:32px;
+    border-radius:50%;
+    background:rgba(10,10,10,0.55);
+    border:1px solid rgba(255,255,255,0.18);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    opacity:0.4;
+    font-size:14px;
+    transition:opacity 0.2s ease, transform 0.15s ease;
+  }
+  #theme-toggle:hover{ opacity:1; transform:scale(1.06); }
+  #theme-menu{
+    position:fixed;
+    top:56px; right:18px;
+    z-index:6;
+    background:rgba(12,12,12,0.94);
+    border:1px solid rgba(255,255,255,0.14);
+    border-radius:10px;
+    padding:6px;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    min-width:100px;
+    opacity:0;
+    transform:translateY(-6px);
+    pointer-events:none;
+    transition:opacity 0.16s ease, transform 0.16s ease;
+  }
+  #theme-menu.open{ opacity:1; transform:translateY(0); pointer-events:auto; }
+  #theme-menu button{
+    background:transparent;
+    border:none;
+    color:var(--text-dim);
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    text-align:left;
+    padding:7px 9px;
+    border-radius:6px;
+    cursor:pointer;
+  }
+  #theme-menu button:hover{ background:rgba(255,255,255,0.06); color:var(--text); }
+  #theme-menu button.active{ color:var(--amber); }
+
+  #fs-hint{
+    position:fixed;
+    bottom:18px; right:22px;
+    z-index:2;
+    font-size:10px;
+    letter-spacing:0.12em;
+    color:var(--text-dim);
+    text-transform:uppercase;
+    cursor:pointer;
+    opacity:0.4;
+    transition:opacity 0.3s ease;
+  }
+  #fs-hint:hover{ opacity:1; }
+
+  #reset-link{
+    position:fixed;
+    bottom:18px; left:22px;
+    z-index:2;
+    font-size:10px;
+    letter-spacing:0.12em;
+    color:var(--text-dim);
+    text-transform:uppercase;
+    cursor:pointer;
+    opacity:0.4;
+    transition:opacity 0.3s ease;
+  }
+  #reset-link:hover{ opacity:1; }
+  .hidden{ display:none !important; }
+
+  /* ---------- Setup wizard (unchanged: centered modal over everything) ---------- */
   #overlay{
     position:fixed; inset:0;
-    z-index:5;
+    z-index:10;
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -201,15 +267,8 @@
     flex-direction:column;
     gap:18px;
   }
-  #step-indicator{
-    display:flex;
-    gap:6px;
-    text-align:left;
-  }
-  .step-dot{
-    width:26px; height:3px;
-    background:var(--hairline);
-  }
+  #step-indicator{ display:flex; gap:6px; text-align:left; }
+  .step-dot{ width:26px; height:3px; background:var(--hairline); }
   .step-dot.active{ background:var(--amber); }
   .step-dot.done{ background:var(--amber-dim); }
   #overlay h1{
@@ -226,32 +285,18 @@
     text-transform:uppercase;
     color:var(--text-dim);
   }
-  #overlay p{
-    color:var(--text-dim);
-    font-size:13px;
-    line-height:1.65;
-  }
-  #overlay ol{
-    color:var(--text-dim);
-    font-size:13px;
-    line-height:1.8;
-    padding-left:18px;
-  }
+  #overlay p{ color:var(--text-dim); font-size:13px; line-height:1.65; }
+  #overlay ol{ color:var(--text-dim); font-size:13px; line-height:1.8; padding-left:18px; }
   #overlay ol b{ color:var(--text); }
   #overlay .field-box{
-    display:flex;
-    align-items:center;
-    gap:8px;
+    display:flex; align-items:center; gap:8px;
     background:var(--panel);
     border:1px solid var(--hairline);
     padding:10px 12px;
     font-size:12px;
     word-break:break-all;
   }
-  #overlay .field-box code{
-    flex:1;
-    color:var(--amber);
-  }
+  #overlay .field-box code{ flex:1; color:var(--amber); }
   #overlay .field-box button.copy{
     flex-shrink:0;
     border:1px solid var(--hairline);
@@ -274,12 +319,7 @@
     padding:11px 12px;
   }
   #overlay input[type="text"]:focus{ outline:none; border-color:var(--amber); }
-  #overlay .btn-row{
-    display:flex;
-    gap:10px;
-    align-items:center;
-    flex-wrap:wrap;
-  }
+  #overlay .btn-row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
   #overlay button{
     background:transparent;
     border:1px solid var(--amber);
@@ -292,19 +332,9 @@
     cursor:pointer;
     transition:all 0.15s ease;
   }
-  #overlay button:hover{
-    background:var(--amber);
-    color:#000;
-  }
-  #overlay button.secondary{
-    border-color:var(--hairline);
-    color:var(--text-dim);
-  }
-  #overlay button.secondary:hover{
-    background:transparent;
-    border-color:var(--text-dim);
-    color:var(--text);
-  }
+  #overlay button:hover{ background:var(--amber); color:#000; }
+  #overlay button.secondary{ border-color:var(--hairline); color:var(--text-dim); }
+  #overlay button.secondary:hover{ background:transparent; border-color:var(--text-dim); color:var(--text); }
   #overlay .link-btn{
     background:none; border:none;
     color:var(--text-dim);
@@ -314,75 +344,85 @@
     cursor:pointer;
     padding:0;
   }
-  #overlay .note{
-    font-size:11px;
-    color:var(--amber);
-    border-left:2px solid var(--amber-dim);
-    padding-left:10px;
-    line-height:1.6;
-  }
-  #reset-link{
-    position:fixed;
-    bottom:18px; left:22px;
-    z-index:2;
-    font-size:10px;
-    letter-spacing:0.12em;
-    color:var(--text-dim);
-    text-transform:uppercase;
-    cursor:pointer;
-    opacity:0.5;
-    transition:opacity 0.3s ease;
-  }
-  #reset-link:hover{ opacity:1; }
-  .hidden{ display:none !important; }
 
-  /* fullscreen hint, fades after a few seconds */
-  #fs-hint{
-    position:fixed;
-    bottom:18px; right:22px;
-    z-index:2;
-    font-size:10px;
-    letter-spacing:0.12em;
-    color:var(--text-dim);
-    text-transform:uppercase;
-    cursor:pointer;
-    opacity:0.6;
-    transition:opacity 0.3s ease;
+  /* =========================================================
+     THEME: CRT (default) — amber phosphor, faint scanlines
+     ========================================================= */
+  body[data-theme="crt"] #art-sharp::before{
+    background:repeating-linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.14) 0px, rgba(0,0,0,0.14) 1px,
+      transparent 2px, transparent 3px
+    );
+    mix-blend-mode:multiply;
   }
-  #fs-hint:hover{ opacity:1; }
+
+  /* =========================================================
+     THEME: Y2K / iMac — translucent candy tint, chrome text,
+     round candy-dot progress. Same masked art-sharp shape.
+     ========================================================= */
+  body[data-theme="y2k"] #art-sharp{
+    background:linear-gradient(135deg, rgba(58,209,255,0.22), rgba(168,85,247,0.22));
+  }
+  body[data-theme="y2k"] #art-sharp::before{
+    background:radial-gradient(ellipse 70% 40% at 25% 12%, rgba(255,255,255,0.4), transparent 60%);
+    mix-blend-mode:overlay;
+  }
+  body[data-theme="y2k"] #track-title{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:800;
+    letter-spacing:0.01em;
+    background:linear-gradient(180deg, #ffffff 10%, #cfe9ff 45%, #7fb8e0 60%, #ffffff 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    filter:drop-shadow(0 1px 0 rgba(255,255,255,0.35));
+  }
+  body[data-theme="y2k"] #year{
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,0.4);
+    background:rgba(58,209,255,0.18);
+    color:#bfe9ff;
+  }
+  body[data-theme="y2k"] #artist-row{ color:#c9b8ea; }
+  body[data-theme="y2k"] .led{ border-radius:50%; }
+  body[data-theme="y2k"] .led.lit{
+    background:linear-gradient(135deg, #3ad1ff, #a855f7);
+    box-shadow:0 0 6px rgba(58,209,255,0.8);
+  }
+  body[data-theme="y2k"] #status-row{ color:#c9b8ea; }
+  body[data-theme="y2k"] #play-state span{ color:#3ad1ff; }
 </style>
 </head>
-<body>
+<body data-theme="crt">
 
   <div id="backdrop"></div>
 
-  <div id="stage">
-    <div id="art-frame">
-      <img id="art-img" src="" alt="">
-      <div class="bracket tl"></div>
-      <div class="bracket tr"></div>
-      <div class="bracket bl"></div>
-      <div class="bracket br"></div>
+  <div id="art-sharp">
+    <img id="art-img" src="" alt="">
+  </div>
+
+  <div id="info-overlay">
+    <div id="title-row">
+      <div id="track-title">—</div>
+      <div id="year">----</div>
     </div>
-
-    <div id="panel">
-      <div id="title-row">
-        <div id="track-title">—</div>
-        <div id="year">----</div>
-      </div>
-      <div id="artist-row">—</div>
-
-      <div id="led-row">
-        <div id="elapsed">0:00</div>
-        <div id="led-track"></div>
-        <div id="duration">0:00</div>
-      </div>
-
-      <div id="status-row">
-        <div id="play-state">STATUS: <span id="play-state-val">IDLE</span></div>
-        <div id="device-name">—</div>
-      </div>
+    <div id="artist-row">—</div>
+    <div id="led-row">
+      <div id="elapsed">0:00</div>
+      <div id="led-track"></div>
+      <div id="duration">0:00</div>
     </div>
+    <div id="status-row">
+      <div id="play-state">STATUS: <span id="play-state-val">IDLE</span></div>
+      <div id="device-name">—</div>
+    </div>
+  </div>
+
+  <div id="theme-toggle" onclick="toggleThemeMenu(event)">◐</div>
+  <div id="theme-menu">
+    <button id="theme-btn-crt" onclick="setTheme('crt')">CRT</button>
+    <button id="theme-btn-y2k" onclick="setTheme('y2k')">Y2K</button>
   </div>
 
   <div id="fs-hint" onclick="toggleFullscreen()">[ F ] fullscreen</div>
@@ -394,12 +434,10 @@
 
 <script>
 /* =========================================================
-   CONFIG — fill in your own Spotify app's Client ID.
-   Create one at https://developer.spotify.com/dashboard
-   Redirect URI must exactly match what you register there —
-   Each person who uses this page (even from the same shared link)
-   registers their own free Spotify app and pastes in their own
-   Client ID via the wizard below — nothing is hardcoded here.
+   CONFIG — each person who uses this page (even from the same
+   shared link) registers their own free Spotify app and pastes
+   in their own Client ID via the wizard below — nothing is
+   hardcoded here.
    ========================================================= */
 const REDIRECT_URI = window.location.origin + window.location.pathname;
 const SCOPES = "user-read-currently-playing user-read-playback-state";
@@ -407,6 +445,25 @@ const POLL_MS = 3000;
 
 function getClientId(){ return localStorage.getItem("spotify_client_id"); }
 function setClientId(id){ localStorage.setItem("spotify_client_id", id.trim()); }
+
+/* ---------------- Theme system ---------------- */
+/* Add a future theme: one body[data-theme="id"] CSS block above,
+   one line here, one button in the #theme-menu markup. */
+const THEMES = ["crt", "y2k"];
+function applyTheme(id){
+  document.body.dataset.theme = id;
+  THEMES.forEach(t => document.getElementById("theme-btn-" + t)?.classList.toggle("active", t === id));
+}
+function setTheme(id){
+  applyTheme(id);
+  localStorage.setItem("display_theme", id);
+  document.getElementById("theme-menu").classList.remove("open");
+}
+function toggleThemeMenu(e){
+  e.stopPropagation();
+  document.getElementById("theme-menu").classList.toggle("open");
+}
+document.addEventListener("click", () => document.getElementById("theme-menu").classList.remove("open"));
 
 /* ---------------- PKCE helpers ---------------- */
 function base64UrlEncode(arrayBuffer){
@@ -592,6 +649,8 @@ function resetSetup(){
 
 /* ---------------- Boot / auth flow ---------------- */
 async function boot(){
+  applyTheme(localStorage.getItem("display_theme") || "crt");
+
   const urlParams = new URLSearchParams(window.location.search);
   const code = urlParams.get("code");
 
