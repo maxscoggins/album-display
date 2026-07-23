@@ -1,11 +1,13 @@
+<!-- THIS FILE GOES IN THE album-display/ FOLDER, AS index.html (the actual display app) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Now Playing — Album Display</title>
+<link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=JetBrains+Mono:wght@400;500;700&family=Baloo+2:wght@500;700;800&family=Rubik+Bubbles&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=JetBrains+Mono:wght@400;500;700&family=Baloo+2:wght@500;700;800&family=Rubik+Bubbles&family=Archivo+Black&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#050505;
@@ -245,7 +247,9 @@
   #reset-link:hover{ opacity:1; }
   .hidden{ display:none !important; }
 
-  /* ---------- Setup wizard (unchanged: centered modal over everything) ---------- */
+  /* ---------- Setup wizard — Wrapped-inspired: bold color-block card,
+       chunky display type. Independent of the CRT/Y2K display themes,
+       which only apply once setup is done. ---------- */
   #overlay{
     position:fixed; inset:0;
     z-index:10;
@@ -253,96 +257,107 @@
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    gap:22px;
-    background:var(--bg);
-    text-align:left;
+    background:#0a0a0a;
     padding:24px;
     overflow-y:auto;
   }
   #overlay-content{
     width:100%;
-    max-width:460px;
+    max-width:440px;
     display:flex;
     flex-direction:column;
-    gap:18px;
+    gap:16px;
+    background:var(--wr-card, #1ed760);
+    color:#0a0a0a;
+    border-radius:20px;
+    padding:30px 28px;
+    text-align:left;
   }
   #step-indicator{ display:flex; gap:6px; text-align:left; }
-  .step-dot{ width:26px; height:3px; background:var(--hairline); }
-  .step-dot.active{ background:var(--amber); }
-  .step-dot.done{ background:var(--amber-dim); }
+  .step-dot{ width:26px; height:4px; border-radius:2px; background:rgba(0,0,0,0.18); }
+  .step-dot.active{ background:#0a0a0a; }
+  .step-dot.done{ background:rgba(0,0,0,0.4); }
   #overlay h1{
-    font-family:'Big Shoulders Display', sans-serif;
-    font-weight:800;
-    font-size:26px;
-    letter-spacing:0.02em;
+    font-family:'Archivo Black', sans-serif;
+    font-size:28px;
+    line-height:1.05;
     text-transform:uppercase;
-    color:var(--amber);
   }
   #overlay .eyebrow{
     font-size:10px;
     letter-spacing:0.18em;
     text-transform:uppercase;
-    color:var(--text-dim);
+    font-weight:700;
+    opacity:0.6;
   }
-  #overlay p{ color:var(--text-dim); font-size:13px; line-height:1.65; }
-  #overlay ol{ color:var(--text-dim); font-size:13px; line-height:1.8; padding-left:18px; }
-  #overlay ol b{ color:var(--text); }
+  #overlay p{ font-size:13.5px; line-height:1.6; font-weight:500; opacity:0.85; }
+  #overlay ol{ font-size:13.5px; line-height:1.85; font-weight:500; padding-left:18px; opacity:0.9; }
+  #overlay ol b{ font-weight:800; }
   #overlay .field-box{
     display:flex; align-items:center; gap:8px;
-    background:var(--panel);
-    border:1px solid var(--hairline);
+    background:rgba(0,0,0,0.12);
+    border-radius:10px;
     padding:10px 12px;
     font-size:12px;
     word-break:break-all;
   }
-  #overlay .field-box code{ flex:1; color:var(--amber); }
+  #overlay .field-box code{ flex:1; font-weight:700; }
   #overlay .field-box button.copy{
     flex-shrink:0;
-    border:1px solid var(--hairline);
-    background:transparent;
-    color:var(--text-dim);
+    border:none;
+    background:rgba(0,0,0,0.18);
+    color:inherit;
+    border-radius:6px;
     font-size:10px;
-    letter-spacing:0.08em;
+    font-weight:700;
+    letter-spacing:0.06em;
     text-transform:uppercase;
     padding:6px 10px;
     cursor:pointer;
   }
-  #overlay .field-box button.copy:hover{ border-color:var(--amber); color:var(--amber); }
+  #overlay .field-box button.copy:hover{ background:rgba(0,0,0,0.3); }
   #overlay input[type="text"]{
     width:100%;
-    background:var(--panel);
-    border:1px solid var(--hairline);
-    color:var(--text);
-    font-family:'JetBrains Mono', monospace;
-    font-size:13px;
+    background:rgba(0,0,0,0.1);
+    border:2px solid rgba(0,0,0,0.15);
+    border-radius:10px;
+    color:#0a0a0a;
+    font-family:'Inter', sans-serif;
+    font-weight:600;
+    font-size:13.5px;
     padding:11px 12px;
   }
-  #overlay input[type="text"]:focus{ outline:none; border-color:var(--amber); }
+  #overlay input[type="text"]::placeholder{ color:rgba(0,0,0,0.4); }
+  #overlay input[type="text"]:focus{ outline:none; border-color:#0a0a0a; }
   #overlay .btn-row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
   #overlay button{
-    background:transparent;
-    border:1px solid var(--amber);
-    color:var(--amber);
-    font-family:'JetBrains Mono', monospace;
+    background:#0a0a0a;
+    border:none;
+    color:#f5f1e8;
+    font-family:'Inter', sans-serif;
+    font-weight:800;
     font-size:13px;
-    letter-spacing:0.1em;
+    letter-spacing:0.03em;
     text-transform:uppercase;
-    padding:12px 22px;
+    border-radius:10px;
+    padding:13px 22px;
     cursor:pointer;
-    transition:all 0.15s ease;
+    transition:transform 0.12s ease;
   }
-  #overlay button:hover{ background:var(--amber); color:#000; }
-  #overlay button.secondary{ border-color:var(--hairline); color:var(--text-dim); }
-  #overlay button.secondary:hover{ background:transparent; border-color:var(--text-dim); color:var(--text); }
-  #overlay .link-btn{
+  #overlay button:hover{ transform:translateY(-1px); }
+  #overlay button.secondary{ background:rgba(0,0,0,0.15); color:inherit; }
+  #overlay button.link-btn{
     background:none; border:none;
-    color:var(--text-dim);
-    font-family:'JetBrains Mono', monospace;
-    font-size:11px;
+    color:inherit;
+    font-family:'Inter', sans-serif;
+    font-weight:700;
+    font-size:11.5px;
     text-decoration:underline;
     cursor:pointer;
     padding:0;
+    opacity:0.7;
   }
+  #overlay button.link-btn:hover{ transform:none; opacity:1; }
 
   /* =========================================================
      THEME: CRT (default) — amber phosphor, faint scanlines
@@ -575,20 +590,55 @@ function copyRedirectUri(){
   if (btn){ const old = btn.textContent; btn.textContent = "Copied"; setTimeout(() => btn.textContent = old, 1200); }
 }
 
+/* Each step gets a rotating Wrapped-style card color + matching text color */
+const STEP_COLORS = { premium: "#1ed760", "premium-no": "#0a0a0a", "client-id": "#ffd520", "connect": "#6b2fe0", "expired": "#ff3d9a", "error": "#ff3d9a" };
+const STEP_TEXT = { premium: "#0a0a0a", "premium-no": "#f5f1e8", "client-id": "#0a0a0a", "connect": "#f5f1e8", "expired": "#0a0a0a", "error": "#0a0a0a" };
+
 function renderWizard(step){
   const el = document.getElementById("overlay-content");
   document.getElementById("overlay").classList.remove("hidden");
+  document.getElementById("overlay-content").style.setProperty("--wr-card", STEP_COLORS[step] || "#1ed760");
+  el.style.color = STEP_TEXT[step] || "#0a0a0a";
+
+  if (step === "premium"){
+    el.innerHTML = `
+      <div class="eyebrow">Before you start</div>
+      <div id="step-indicator">
+        <div class="step-dot active"></div><div class="step-dot"></div><div class="step-dot"></div>
+      </div>
+      <h1>Do you have Spotify Premium?</h1>
+      <p>Spotify requires the account that creates a developer app to have
+      Premium — this is required to continue, not optional.</p>
+      <div class="btn-row">
+        <button onclick="renderWizard('client-id')">Yes, I have Premium</button>
+        <button class="secondary" onclick="renderWizard('premium-no')">No</button>
+      </div>
+    `;
+  }
+
+  if (step === "premium-no"){
+    el.innerHTML = `
+      <div class="eyebrow">Premium required</div>
+      <h1>You'll need Premium first</h1>
+      <p>This is a Spotify rule, not something this app can work around —
+      accounts without Premium can't create the developer app this setup
+      needs. Free accounts can still use Spotify normally, just not this.</p>
+      <div class="btn-row">
+        <button onclick="window.open('https://www.spotify.com/premium/','_blank')">See Premium plans</button>
+        <button class="secondary" onclick="renderWizard('premium')">Back</button>
+      </div>
+    `;
+  }
 
   if (step === "client-id"){
     el.innerHTML = `
-      <div class="eyebrow">Step 1 of 2</div>
+      <div class="eyebrow">Step 2 of 3</div>
       <div id="step-indicator">
-        <div class="step-dot active"></div><div class="step-dot"></div>
+        <div class="step-dot done"></div><div class="step-dot active"></div><div class="step-dot"></div>
       </div>
       <h1>Create your Spotify app</h1>
       <p>Every person using this display needs their own free Spotify app —
-      it's a 2-minute form, not a real app. Spotify requires the account that
-      creates it to have <b style="color:var(--text)">Premium</b> for this to keep working.</p>
+      it's a 2-minute form, not a real app.</p>
       <ol>
         <li>Open the <b>Spotify Developer Dashboard</b> and click <b>Create app</b>.</li>
         <li>Name/description: anything you want.</li>
@@ -601,19 +651,20 @@ function renderWizard(step){
       <div class="btn-row">
         <button onclick="window.open('https://developer.spotify.com/dashboard','_blank')">Open Dashboard</button>
       </div>
-      <p style="margin-top:6px;">Then copy the app's <b style="color:var(--text)">Client ID</b> from Settings and paste it below.</p>
+      <p style="margin-top:6px;">Then copy the app's <b>Client ID</b> from Settings and paste it below.</p>
       <input type="text" id="client-id-input" placeholder="Paste your Client ID">
       <div class="btn-row">
         <button onclick="submitClientId()">Continue</button>
+        <button class="secondary" onclick="renderWizard('premium')">Back</button>
       </div>
     `;
   }
 
   if (step === "connect"){
     el.innerHTML = `
-      <div class="eyebrow">Step 2 of 2</div>
+      <div class="eyebrow">Step 3 of 3</div>
       <div id="step-indicator">
-        <div class="step-dot done"></div><div class="step-dot active"></div>
+        <div class="step-dot done"></div><div class="step-dot done"></div><div class="step-dot active"></div>
       </div>
       <h1>Connect your account</h1>
       <p>Log in with the same Spotify account you used to create the app, and
@@ -627,6 +678,20 @@ function renderWizard(step){
     `;
   }
 
+  if (step === "expired"){
+    el.innerHTML = `
+      <div class="eyebrow">Reconnect needed</div>
+      <h1>Your Spotify connection expired</h1>
+      <p>This happens sometimes — a login session ran out, or access was
+      revoked from your Spotify account settings. Nothing was lost: your
+      Client ID is still saved, you just need to log in again.</p>
+      <div class="btn-row">
+        <button onclick="login()">Reconnect Spotify</button>
+      </div>
+      <button class="link-btn" onclick="resetSetup()">Start over with a different Client ID</button>
+    `;
+  }
+
   if (step === "error"){
     el.innerHTML = `
       <div class="eyebrow">Something went wrong</div>
@@ -634,7 +699,7 @@ function renderWizard(step){
       <p>The connection to Spotify failed. Double check the Redirect URI in
       your app's settings matches exactly, then try again.</p>
       <div class="btn-row">
-        <button onclick="renderWizard(getClientId() ? 'connect' : 'client-id')">Try again</button>
+        <button onclick="renderWizard(getClientId() ? 'connect' : 'premium')">Try again</button>
       </div>
     `;
   }
@@ -655,7 +720,16 @@ function resetSetup(){
   localStorage.removeItem("spotify_refresh_token");
   localStorage.removeItem("spotify_token_expires");
   document.getElementById("reset-link").classList.add("hidden");
-  renderWizard("client-id");
+  renderWizard("premium");
+}
+
+/* Distinguishes "never connected" from "was connected, needs renewal" —
+   so the wizard can explain what's actually happening instead of just
+   silently showing the same connect screen either way. */
+function nextWizardStep(){
+  if (!getClientId()) return "premium";
+  if (localStorage.getItem("spotify_refresh_token")) return "expired";
+  return "connect";
 }
 
 /* ---------------- Boot / auth flow ---------------- */
@@ -674,11 +748,12 @@ async function boot(){
       renderWizard("error");
       return;
     }
+
   }
 
   const token = await getValidToken();
   if (!token){
-    renderWizard(getClientId() ? "connect" : "client-id");
+    renderWizard(nextWizardStep());
     return;
   }
   hideOverlay();
@@ -695,7 +770,7 @@ let lastTrackId = null;
 
 async function pollNowPlaying(){
   const token = await getValidToken();
-  if (!token){ renderWizard(getClientId() ? "connect" : "client-id"); return; }
+  if (!token){ renderWizard(nextWizardStep()); return; }
 
   const res = await fetch("https://api.spotify.com/v1/me/player/currently-playing", {
     headers: { Authorization: "Bearer " + token }
