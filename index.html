@@ -3,13 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Now Playing — Album Display</title>
+<title>Design Preview — Now Playing Display</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=JetBrains+Mono:wght@400;500;700&family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800&family=JetBrains+Mono:wght@400;500;700&family=Baloo+2:wght@500;700;800&family=Rubik+Bubbles&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#050505;
-    --panel:#0d0d0d;
     --hairline:#2b2b2b;
     --text:#f2f0ea;
     --text-dim:#9a958a;
@@ -32,21 +31,16 @@
     background-position:center;
     filter:blur(70px) saturate(1.3) brightness(0.4);
     transform:scale(1.15);
-    transition:background-image 0.5s ease;
+    transition:background 0.4s ease;
     z-index:0;
-  }
-  #backdrop::after{
-    content:"";
-    position:absolute; inset:0;
-    background:radial-gradient(ellipse at center, transparent 40%, #000 95%);
   }
 
   /* ---------- Sharp art, sized to the smaller viewport dimension so it
        stays square and dominant. Its own edges fade to transparent via
-       mask, revealing the blurred backdrop seamlessly underneath —
-       this removes the "framed square in black bars" look on wide
-       screens. On a square-ish monitor the fade barely shows, since
-       the art already fills nearly the whole screen. ---------- */
+       mask, revealing the blurred backdrop seamlessly underneath — this
+       is what removes the "framed square floating in black" look on
+       wide screens. On a square-ish monitor this fade barely shows,
+       since the art already fills almost the whole screen. ---------- */
   #art-sharp{
     position:fixed;
     top:50%; left:50%;
@@ -58,10 +52,11 @@
     -webkit-mask-image:radial-gradient(circle at center, black 58%, transparent 90%);
     mask-image:radial-gradient(circle at center, black 58%, transparent 90%);
   }
-  #art-sharp img{
+  #art-sharp .art-fill{
     width:100%; height:100%;
-    object-fit:cover;
-    display:block;
+    background-size:cover;
+    background-position:center;
+    transition:background 0.4s ease;
   }
   /* faint scanline texture, CRT theme only (see theme block below) */
   #art-sharp::before{
@@ -231,118 +226,39 @@
   }
   #fs-hint:hover{ opacity:1; }
 
-  #reset-link{
+  /* ---------- Dev-only preview dock — not part of the real app ---------- */
+  #dock{
     position:fixed;
-    bottom:18px; left:22px;
-    z-index:2;
-    font-size:10px;
-    letter-spacing:0.12em;
-    color:var(--text-dim);
-    text-transform:uppercase;
-    cursor:pointer;
-    opacity:0.4;
-    transition:opacity 0.3s ease;
-  }
-  #reset-link:hover{ opacity:1; }
-  .hidden{ display:none !important; }
-
-  /* ---------- Setup wizard (unchanged: centered modal over everything) ---------- */
-  #overlay{
-    position:fixed; inset:0;
-    z-index:10;
+    top:16px; left:50%;
+    transform:translateX(-50%);
+    z-index:6;
     display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:22px;
-    background:var(--bg);
-    text-align:left;
-    padding:24px;
-    overflow-y:auto;
-  }
-  #overlay-content{
-    width:100%;
-    max-width:460px;
-    display:flex;
-    flex-direction:column;
-    gap:18px;
-  }
-  #step-indicator{ display:flex; gap:6px; text-align:left; }
-  .step-dot{ width:26px; height:3px; background:var(--hairline); }
-  .step-dot.active{ background:var(--amber); }
-  .step-dot.done{ background:var(--amber-dim); }
-  #overlay h1{
-    font-family:'Big Shoulders Display', sans-serif;
-    font-weight:800;
-    font-size:26px;
-    letter-spacing:0.02em;
-    text-transform:uppercase;
-    color:var(--amber);
-  }
-  #overlay .eyebrow{
-    font-size:10px;
-    letter-spacing:0.18em;
-    text-transform:uppercase;
-    color:var(--text-dim);
-  }
-  #overlay p{ color:var(--text-dim); font-size:13px; line-height:1.65; }
-  #overlay ol{ color:var(--text-dim); font-size:13px; line-height:1.8; padding-left:18px; }
-  #overlay ol b{ color:var(--text); }
-  #overlay .field-box{
-    display:flex; align-items:center; gap:8px;
-    background:var(--panel);
+    gap:8px;
+    background:rgba(13,13,13,0.9);
     border:1px solid var(--hairline);
-    padding:10px 12px;
-    font-size:12px;
-    word-break:break-all;
+    padding:8px;
+    backdrop-filter:blur(6px);
   }
-  #overlay .field-box code{ flex:1; color:var(--amber); }
-  #overlay .field-box button.copy{
-    flex-shrink:0;
-    border:1px solid var(--hairline);
+  #dock button{
     background:transparent;
+    border:1px solid var(--hairline);
     color:var(--text-dim);
+    font-family:'JetBrains Mono', monospace;
     font-size:10px;
     letter-spacing:0.08em;
     text-transform:uppercase;
-    padding:6px 10px;
+    padding:8px 12px;
     cursor:pointer;
   }
-  #overlay .field-box button.copy:hover{ border-color:var(--amber); color:var(--amber); }
-  #overlay input[type="text"]{
-    width:100%;
-    background:var(--panel);
-    border:1px solid var(--hairline);
-    color:var(--text);
-    font-family:'JetBrains Mono', monospace;
-    font-size:13px;
-    padding:11px 12px;
-  }
-  #overlay input[type="text"]:focus{ outline:none; border-color:var(--amber); }
-  #overlay .btn-row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-  #overlay button{
-    background:transparent;
-    border:1px solid var(--amber);
-    color:var(--amber);
-    font-family:'JetBrains Mono', monospace;
-    font-size:13px;
+  #dock button:hover{ border-color:var(--amber); color:var(--amber); }
+  #dock .label{
+    font-size:9px;
+    color:var(--text-dim);
     letter-spacing:0.1em;
     text-transform:uppercase;
-    padding:12px 22px;
-    cursor:pointer;
-    transition:all 0.15s ease;
-  }
-  #overlay button:hover{ background:var(--amber); color:#000; }
-  #overlay button.secondary{ border-color:var(--hairline); color:var(--text-dim); }
-  #overlay button.secondary:hover{ background:transparent; border-color:var(--text-dim); color:var(--text); }
-  #overlay .link-btn{
-    background:none; border:none;
-    color:var(--text-dim);
-    font-family:'JetBrains Mono', monospace;
-    font-size:11px;
-    text-decoration:underline;
-    cursor:pointer;
-    padding:0;
+    align-self:center;
+    padding:0 4px;
+    opacity:0.6;
   }
 
   /* =========================================================
@@ -369,22 +285,35 @@
     mix-blend-mode:overlay;
   }
   body[data-theme="y2k"] #track-title{
-    font-family:'Baloo 2', sans-serif;
-    font-weight:800;
+    font-family:'Rubik Bubbles', sans-serif;
+    font-weight:400;
     letter-spacing:0.01em;
-    background:linear-gradient(180deg, #ffffff 10%, #cfe9ff 45%, #7fb8e0 60%, #ffffff 100%);
-    -webkit-background-clip:text;
-    background-clip:text;
-    color:transparent;
-    filter:drop-shadow(0 1px 0 rgba(255,255,255,0.35));
+    color:#fdfbff;
+    -webkit-text-stroke:1.5px #3d2570;
+    text-shadow:
+      2px 2px 0 #3d2570,
+      3px 3px 0 #3d2570,
+      4px 4px 0 #3d2570,
+      5px 5px 0 #3d2570;
+    transform:skewX(-4deg);
+    transform-origin:left bottom;
+    display:inline-block;
+    filter:none;
   }
   body[data-theme="y2k"] #year{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
     border-radius:999px;
     border:1px solid rgba(255,255,255,0.4);
     background:rgba(58,209,255,0.18);
     color:#bfe9ff;
   }
-  body[data-theme="y2k"] #artist-row{ color:#c9b8ea; }
+  body[data-theme="y2k"] #artist-row{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:600;
+    letter-spacing:0.02em;
+    color:#c9b8ea;
+  }
   body[data-theme="y2k"] .led{ border-radius:50%; }
   body[data-theme="y2k"] .led.lit{
     background:linear-gradient(135deg, #3ad1ff, #a855f7);
@@ -396,10 +325,17 @@
 </head>
 <body data-theme="crt">
 
+  <div id="dock">
+    <span class="label">preview only</span>
+    <button onclick="cycleTrack()">Next track ▸</button>
+    <button onclick="togglePlay()">Toggle play/pause</button>
+    <button onclick="toggleFullscreen()">Fullscreen [F]</button>
+  </div>
+
   <div id="backdrop"></div>
 
   <div id="art-sharp">
-    <img id="art-img" src="" alt="">
+    <div class="art-fill" id="art-fill"></div>
   </div>
 
   <div id="info-overlay">
@@ -414,11 +350,12 @@
       <div id="duration">0:00</div>
     </div>
     <div id="status-row">
-      <div id="play-state">STATUS: <span id="play-state-val">IDLE</span></div>
-      <div id="device-name">—</div>
+      <div id="play-state">STATUS: <span id="play-state-val">PLAYING</span></div>
+      <div id="device-name">Living Room</div>
     </div>
   </div>
 
+  <!-- Real app UI: small icon, hidden until tapped -->
   <div id="theme-toggle" onclick="toggleThemeMenu(event)">◐</div>
   <div id="theme-menu">
     <button id="theme-btn-crt" onclick="setTheme('crt')">CRT</button>
@@ -426,325 +363,22 @@
   </div>
 
   <div id="fs-hint" onclick="toggleFullscreen()">[ F ] fullscreen</div>
-  <div id="reset-link" class="hidden" onclick="resetSetup()">reset setup</div>
-
-  <div id="overlay">
-    <div id="overlay-content"></div>
-  </div>
 
 <script>
-/* =========================================================
-   CONFIG — each person who uses this page (even from the same
-   shared link) registers their own free Spotify app and pastes
-   in their own Client ID via the wizard below — nothing is
-   hardcoded here.
-   ========================================================= */
-const REDIRECT_URI = window.location.origin + window.location.pathname;
-const SCOPES = "user-read-currently-playing user-read-playback-state";
-const POLL_MS = 3000;
-
-function getClientId(){ return localStorage.getItem("spotify_client_id"); }
-function setClientId(id){ localStorage.setItem("spotify_client_id", id.trim()); }
-
-/* ---------------- Theme system ---------------- */
-/* Add a future theme: one body[data-theme="id"] CSS block above,
-   one line here, one button in the #theme-menu markup. */
-const THEMES = ["crt", "y2k"];
-function applyTheme(id){
-  document.body.dataset.theme = id;
-  THEMES.forEach(t => document.getElementById("theme-btn-" + t)?.classList.toggle("active", t === id));
-}
-function setTheme(id){
-  applyTheme(id);
-  localStorage.setItem("display_theme", id);
-  document.getElementById("theme-menu").classList.remove("open");
-}
-function toggleThemeMenu(e){
-  e.stopPropagation();
-  document.getElementById("theme-menu").classList.toggle("open");
-}
-document.addEventListener("click", () => document.getElementById("theme-menu").classList.remove("open"));
-
-/* ---------------- PKCE helpers ---------------- */
-function base64UrlEncode(arrayBuffer){
-  return btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
-    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-}
-function generateRandomString(length){
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let out = "";
-  const values = crypto.getRandomValues(new Uint8Array(length));
-  for (let i = 0; i < length; i++) out += chars[values[i] % chars.length];
-  return out;
-}
-async function sha256(plain){
-  const encoder = new TextEncoder();
-  const data = encoder.encode(plain);
-  return crypto.subtle.digest("SHA-256", data);
-}
-
-async function login(){
-  const clientId = getClientId();
-  if (!clientId){ renderWizard("client-id"); return; }
-
-  const verifier = generateRandomString(64);
-  sessionStorage.setItem("pkce_verifier", verifier);
-  const challenge = base64UrlEncode(await sha256(verifier));
-
-  const params = new URLSearchParams({
-    client_id: clientId,
-    response_type: "code",
-    redirect_uri: REDIRECT_URI,
-    scope: SCOPES,
-    code_challenge_method: "S256",
-    code_challenge: challenge
-  });
-  window.location = "https://accounts.spotify.com/authorize?" + params.toString();
-}
-
-async function exchangeCodeForToken(code){
-  const verifier = sessionStorage.getItem("pkce_verifier");
-  const clientId = getClientId();
-  const body = new URLSearchParams({
-    client_id: clientId,
-    grant_type: "authorization_code",
-    code,
-    redirect_uri: REDIRECT_URI,
-    code_verifier: verifier
-  });
-  const res = await fetch("https://accounts.spotify.com/api/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body
-  });
-  if (!res.ok) throw new Error("Token exchange failed: " + res.status);
-  return res.json();
-}
-
-async function refreshToken(){
-  const refresh_token = localStorage.getItem("spotify_refresh_token");
-  const clientId = getClientId();
-  if (!refresh_token || !clientId) return null;
-  const body = new URLSearchParams({
-    client_id: clientId,
-    grant_type: "refresh_token",
-    refresh_token
-  });
-  const res = await fetch("https://accounts.spotify.com/api/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body
-  });
-  if (!res.ok) return null;
-  const data = await res.json();
-  storeTokens(data);
-  return data.access_token;
-}
-
-function storeTokens(data){
-  localStorage.setItem("spotify_access_token", data.access_token);
-  localStorage.setItem("spotify_token_expires", Date.now() + (data.expires_in * 1000));
-  if (data.refresh_token) localStorage.setItem("spotify_refresh_token", data.refresh_token);
-}
-
-async function getValidToken(){
-  const expires = Number(localStorage.getItem("spotify_token_expires") || 0);
-  let token = localStorage.getItem("spotify_access_token");
-  if (!token) return null;
-  if (Date.now() > expires - 15000){
-    token = await refreshToken();
-  }
-  return token;
-}
-
-/* ---------------- Setup wizard ---------------- */
-function copyRedirectUri(){
-  navigator.clipboard.writeText(REDIRECT_URI);
-  const btn = document.getElementById("copy-uri-btn");
-  if (btn){ const old = btn.textContent; btn.textContent = "Copied"; setTimeout(() => btn.textContent = old, 1200); }
-}
-
-function renderWizard(step){
-  const el = document.getElementById("overlay-content");
-  document.getElementById("overlay").classList.remove("hidden");
-
-  if (step === "client-id"){
-    el.innerHTML = `
-      <div class="eyebrow">Step 1 of 2</div>
-      <div id="step-indicator">
-        <div class="step-dot active"></div><div class="step-dot"></div>
-      </div>
-      <h1>Create your Spotify app</h1>
-      <p>Every person using this display needs their own free Spotify app —
-      it's a 2-minute form, not a real app. Spotify requires the account that
-      creates it to have <b style="color:var(--text)">Premium</b> for this to keep working.</p>
-      <ol>
-        <li>Open the <b>Spotify Developer Dashboard</b> and click <b>Create app</b>.</li>
-        <li>Name/description: anything you want.</li>
-        <li>Paste this exact <b>Redirect URI</b> into the app's settings:</li>
-      </ol>
-      <div class="field-box">
-        <code>${REDIRECT_URI}</code>
-        <button class="copy" id="copy-uri-btn" onclick="copyRedirectUri()">Copy</button>
-      </div>
-      <div class="btn-row">
-        <button onclick="window.open('https://developer.spotify.com/dashboard','_blank')">Open Dashboard</button>
-      </div>
-      <p style="margin-top:6px;">Then copy the app's <b style="color:var(--text)">Client ID</b> from Settings and paste it below.</p>
-      <input type="text" id="client-id-input" placeholder="Paste your Client ID">
-      <div class="btn-row">
-        <button onclick="submitClientId()">Continue</button>
-      </div>
-    `;
-  }
-
-  if (step === "connect"){
-    el.innerHTML = `
-      <div class="eyebrow">Step 2 of 2</div>
-      <div id="step-indicator">
-        <div class="step-dot done"></div><div class="step-dot active"></div>
-      </div>
-      <h1>Connect your account</h1>
-      <p>Log in with the same Spotify account you used to create the app, and
-      approve access. This screen shows whatever's currently playing on that
-      account, from any device.</p>
-      <div class="btn-row">
-        <button onclick="login()">Connect Spotify</button>
-        <button class="secondary" onclick="submitClientId(true)">Back</button>
-      </div>
-      <button class="link-btn" onclick="resetSetup()">Start over with a different Client ID</button>
-    `;
-  }
-
-  if (step === "error"){
-    el.innerHTML = `
-      <div class="eyebrow">Something went wrong</div>
-      <h1>Couldn't connect</h1>
-      <p>The connection to Spotify failed. Double check the Redirect URI in
-      your app's settings matches exactly, then try again.</p>
-      <div class="btn-row">
-        <button onclick="renderWizard(getClientId() ? 'connect' : 'client-id')">Try again</button>
-      </div>
-    `;
-  }
-}
-
-function submitClientId(skipSave){
-  if (!skipSave){
-    const val = document.getElementById("client-id-input").value.trim();
-    if (!val) return;
-    setClientId(val);
-  }
-  renderWizard("connect");
-}
-
-function resetSetup(){
-  localStorage.removeItem("spotify_client_id");
-  localStorage.removeItem("spotify_access_token");
-  localStorage.removeItem("spotify_refresh_token");
-  localStorage.removeItem("spotify_token_expires");
-  document.getElementById("reset-link").classList.add("hidden");
-  renderWizard("client-id");
-}
-
-/* ---------------- Boot / auth flow ---------------- */
-async function boot(){
-  applyTheme(localStorage.getItem("display_theme") || "crt");
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const code = urlParams.get("code");
-
-  if (code){
-    try {
-      const data = await exchangeCodeForToken(code);
-      storeTokens(data);
-      window.history.replaceState({}, document.title, window.location.pathname);
-    } catch (e){
-      renderWizard("error");
-      return;
-    }
-  }
-
-  const token = await getValidToken();
-  if (!token){
-    renderWizard(getClientId() ? "connect" : "client-id");
-    return;
-  }
-  hideOverlay();
-  startPolling();
-}
-
-function hideOverlay(){
-  document.getElementById("overlay").classList.add("hidden");
-  document.getElementById("reset-link").classList.remove("hidden");
-}
-
-/* ---------------- Now playing polling ---------------- */
-let lastTrackId = null;
-
-async function pollNowPlaying(){
-  const token = await getValidToken();
-  if (!token){ renderWizard(getClientId() ? "connect" : "client-id"); return; }
-
-  const res = await fetch("https://api.spotify.com/v1/me/player/currently-playing", {
-    headers: { Authorization: "Bearer " + token }
-  });
-
-  if (res.status === 204){
-    setIdleState();
-    return;
-  }
-  if (res.status === 401){
-    await refreshToken();
-    return;
-  }
-  if (!res.ok) return;
-
-  const data = await res.json();
-  if (!data || !data.item) { setIdleState(); return; }
-  renderTrack(data);
-}
-
-function setIdleState(){
-  document.getElementById("play-state-val").textContent = "PAUSED";
-}
-
-function renderTrack(data){
-  const item = data.item;
-  const artUrl = item.album.images[0]?.url || "";
-  const title = item.name;
-  const artists = item.artists.map(a => a.name).join(", ");
-  const year = (item.album.release_date || "").slice(0, 4);
-  const progress = data.progress_ms || 0;
-  const duration = item.duration_ms || 1;
-  const isPlaying = data.is_playing;
-  const deviceName = data.device?.name || "";
-
-  if (item.id !== lastTrackId){
-    lastTrackId = item.id;
-    document.getElementById("art-img").src = artUrl;
-    document.getElementById("backdrop").style.backgroundImage = `url("${artUrl}")`;
-    document.getElementById("track-title").textContent = title;
-    document.getElementById("artist-row").textContent = artists;
-    document.getElementById("year").textContent = year || "----";
-    buildLedTrack();
-  }
-
-  document.getElementById("play-state-val").textContent = isPlaying ? "PLAYING" : "PAUSED";
-  document.getElementById("device-name").textContent = deviceName;
-  document.getElementById("elapsed").textContent = formatTime(progress);
-  document.getElementById("duration").textContent = formatTime(duration);
-  updateLeds(progress / duration);
-}
-
-function formatTime(ms){
-  const totalSec = Math.floor(ms / 1000);
-  const min = Math.floor(totalSec / 60);
-  const sec = totalSec % 60;
-  return `${min}:${sec.toString().padStart(2, "0")}`;
-}
+/* Mock data only — nothing here talks to Spotify. Gradients stand
+   in for album art so layout/blend can be judged without real images. */
+const MOCK_TRACKS = [
+  { title: "Nightswim", artist: "Empire of the Sun", year: "2013", duration: 245, gradient: "linear-gradient(135deg,#ff9a3c,#ff3c78)" },
+  { title: "A Very Long Song Title That Keeps Going On And On", artist: "The Overly Descriptive Band Name Collective", year: "2019", duration: 312, gradient: "linear-gradient(135deg,#3ca7ff,#7c3cff)" },
+  { title: "Blue", artist: "Wave", year: "1998", duration: 178, gradient: "linear-gradient(135deg,#2c3e50,#4ca1af)" },
+  { title: "Static & Silence", artist: "Room Tone", year: "2024", duration: 260, gradient: "linear-gradient(135deg,#1a1a1a,#3c3c3c)" }
+];
 
 const LED_COUNT = 40;
+let trackIndex = 0;
+let isPlaying = true;
+let progress = 40;
+
 function buildLedTrack(){
   const track = document.getElementById("led-track");
   track.innerHTML = "";
@@ -754,20 +388,39 @@ function buildLedTrack(){
     track.appendChild(led);
   }
 }
+function formatTime(sec){
+  const min = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${min}:${s.toString().padStart(2, "0")}`;
+}
 function updateLeds(fraction){
   const leds = document.querySelectorAll(".led");
-  const litCount = Math.round(fraction * leds.length);
-  leds.forEach((led, i) => led.classList.toggle("lit", i < litCount));
+  const lit = Math.round(fraction * leds.length);
+  leds.forEach((led, i) => led.classList.toggle("lit", i < lit));
 }
 
-let pollHandle = null;
-function startPolling(){
-  pollNowPlaying();
-  if (pollHandle) clearInterval(pollHandle);
-  pollHandle = setInterval(pollNowPlaying, POLL_MS);
+function render(){
+  const t = MOCK_TRACKS[trackIndex];
+  document.getElementById("art-fill").style.background = t.gradient;
+  document.getElementById("backdrop").style.background = t.gradient;
+  document.getElementById("track-title").textContent = t.title;
+  document.getElementById("artist-row").textContent = t.artist;
+  document.getElementById("year").textContent = t.year;
+  document.getElementById("elapsed").textContent = formatTime(progress);
+  document.getElementById("duration").textContent = formatTime(t.duration);
+  document.getElementById("play-state-val").textContent = isPlaying ? "PLAYING" : "PAUSED";
+  updateLeds(progress / t.duration);
 }
 
-/* ---------------- Fullscreen ---------------- */
+function cycleTrack(){
+  trackIndex = (trackIndex + 1) % MOCK_TRACKS.length;
+  progress = Math.floor(Math.random() * 60);
+  render();
+}
+function togglePlay(){
+  isPlaying = !isPlaying;
+  render();
+}
 function toggleFullscreen(){
   if (!document.fullscreenElement){
     document.documentElement.requestFullscreen().catch(() => {});
@@ -779,7 +432,29 @@ window.addEventListener("keydown", (e) => {
   if (e.key === "f" || e.key === "F") toggleFullscreen();
 });
 
-boot();
+/* THEMES list — add a future theme by adding its id here plus a
+   body[data-theme="id"] CSS block above. Nothing else changes. */
+const THEMES = ["crt", "y2k"];
+function setTheme(id){
+  document.body.dataset.theme = id;
+  THEMES.forEach(t => document.getElementById("theme-btn-" + t)?.classList.toggle("active", t === id));
+  document.getElementById("theme-menu").classList.remove("open");
+}
+function toggleThemeMenu(e){
+  e.stopPropagation();
+  document.getElementById("theme-menu").classList.toggle("open");
+}
+document.addEventListener("click", () => document.getElementById("theme-menu").classList.remove("open"));
+
+setTheme("crt");
+buildLedTrack();
+render();
+setInterval(() => {
+  if (!isPlaying) return;
+  const t = MOCK_TRACKS[trackIndex];
+  progress = (progress + 1) % t.duration;
+  render();
+}, 1000);
 </script>
 </body>
 </html>
